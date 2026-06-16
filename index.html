@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PokéGuess - ¿Quién es ese Pokémon?</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="game-wrapper">
+        <header class="game-header">
+            <h1>PokéGuess</h1>
+            <p>¡Demuestra que eres un Maestro Pokémon!</p>
+        </header>
+
+        <main id="menuScreen" class="screen active">
+            <div class="game-card menu-card pokedex-menu-style">
+                <h2>Elige tu Modo de Juego</h2>
+                <div class="menu-grid">
+                    <button class="btn btn-primary menu-btn" onclick="startGame('random', 'silhouette')">
+                        <span class="btn-icon">👤❓</span> Aleatorio<br><small>(Sombras)</small>
+                    </button>
+                    <button class="btn btn-primary menu-btn" onclick="startGame('random', 'color')">
+                        <span class="btn-icon">🎨❓</span> Aleatorio<br><small>(Color)</small>
+                    </button>
+                    
+                    <button class="btn btn-secondary menu-btn" onclick="startGame('pokedex', 'silhouette')">
+                        <span class="btn-icon">👤📖</span> Pokédex<br><small>(Sombras)</small>
+                    </button>
+                    <button class="btn btn-secondary menu-btn" onclick="startGame('pokedex', 'color')">
+                        <span class="btn-icon">🎨📖</span> Pokédex<br><small>(Color)</small>
+                    </button>
+
+                    <button class="btn btn-warning menu-btn" onclick="startTimeAttack()">
+                        <span class="btn-icon">⏱️🏃</span> Contrarreloj<br><small>(15 Pokémon)</small>
+                    </button>
+                    <button class="btn btn-info menu-btn" onclick="startTypeMaster()">
+                        <span class="btn-icon">⚔️🛡️</span> Maestro<br><small>(Tabla de Tipos)</small>
+                    </button>
+                </div>
+                
+                <hr class="divider">
+                
+                <button class="btn btn-success pulse-constant" onclick="showGallery()">🏆 Ver mi Pokédex 🏆</button>
+            </div>
+        </main>
+
+        <div id="gameScreen" class="screen">
+            <div id="timeAttackPanel" class="timer-panel" style="display: none;">
+                <div class="timer-badge">⏱️ <span id="timerDisplay">00:00</span></div>
+                <div class="progress-badge">Ronda <span id="progressDisplay">1/15</span></div>
+            </div>
+
+            <section id="classicStats" class="stats-panel" aria-label="Estadísticas del jugador">
+                <div class="stat-box">
+                    <span class="stat-label">Puntos</span>
+                    <span id="scoreDisplay" class="stat-value">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Racha</span>
+                    <span id="streakDisplay" class="stat-value">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Mejor Racha</span>
+                    <span id="highScoreDisplay" class="stat-value">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Acierto</span>
+                    <span id="accuracyDisplay" class="stat-value">0%</span>
+                </div>
+            </section>
+
+            <main class="game-card">
+                <div class="image-container" id="imageContainer">
+                    <img id="pokemonImage" src="" alt="Pokémon Misterioso" class="silhouette" draggable="false">
+                </div>
+                
+                <div class="interaction-area">
+                    <div class="input-group">
+                        <input type="text" id="guessInput" placeholder="Escribe el nombre aquí..." autocomplete="off" spellcheck="false" aria-label="Nombre del Pokémon">
+                        <div id="suggestionsBox" class="suggestions-box"></div>
+                    </div>
+                    
+                    <div class="button-group">
+                        <button id="prevBtn" class="btn btn-secondary" style="display: none;" aria-label="Pokémon Anterior">Anterior</button>
+                        <button id="checkBtn" class="btn btn-primary" aria-label="Adivinar Pokémon">¡Adivinar!</button>
+                        <button id="skipBtn" class="btn btn-secondary" aria-label="Saltar Pokémon">Saltar</button>
+                    </div>
+                </div>
+                
+                <div id="feedbackMessage" class="feedback-message" aria-live="polite"></div>
+            </main>
+
+            <footer class="game-footer">
+                <button class="btn btn-secondary btn-small" onclick="showMenu()">Volver al Menú</button>
+            </footer>
+        </div>
+
+        <div id="typeScreen" class="screen">
+            <section class="stats-panel" style="margin-bottom: -10px;">
+                <div class="stat-box">
+                    <span class="stat-label">Puntos Tipo</span>
+                    <span id="typeScoreDisplay" class="stat-value">0</span>
+                </div>
+                <div class="stat-box">
+                    <span class="stat-label">Racha</span>
+                    <span id="typeStreakDisplay" class="stat-value">0</span>
+                </div>
+            </section>
+
+            <main class="game-card type-master-card">
+                <h2>Simulador de Combate</h2>
+                
+                <div class="type-arena">
+                    <div class="type-box attacker">
+                        <span>Ataque</span>
+                        <div id="attackType" class="type-badge">FUEGO</div>
+                    </div>
+                    <div class="vs-badge">VS</div>
+                    <div class="type-box defender">
+                        <span>Defensa</span>
+                        <div id="defendType" class="type-badge">PLANTA</div>
+                    </div>
+                </div>
+
+                <p class="type-question">¿Cuál es la efectividad de este ataque?</p>
+
+                <div class="type-buttons">
+                    <button class="btn btn-type-option" onclick="handleTypeGuess(2)">🌟 x2 (Súper Eficaz)</button>
+                    <button class="btn btn-type-option" onclick="handleTypeGuess(1)">➖ x1 (Neutro)</button>
+                    <button class="btn btn-type-option" onclick="handleTypeGuess(0.5)">🔽 x0.5 (Poco Eficaz)</button>
+                    <button class="btn btn-type-option" onclick="handleTypeGuess(0)">❌ x0 (Inmune)</button>
+                </div>
+                
+                <div id="typeFeedbackMessage" class="feedback-message"></div>
+            </main>
+            
+            <footer class="game-footer">
+                <button class="btn btn-secondary btn-small" onclick="showMenu()">Abandonar Entrenamiento</button>
+            </footer>
+        </div>
+
+        <div id="galleryScreen" class="screen">
+            <div class="game-card gallery-card">
+                <h2>Tu Pokédex</h2>
+                <p class="gallery-subtitle">Has atrapado a <span id="caughtCount" class="text-success">0</span> de 1025 Pokémon.</p>
+                
+                <div id="galleryGrid" class="gallery-container"></div>
+                
+                <div class="gallery-controls">
+                    <button class="btn btn-secondary" onclick="showMenu()">Volver al Menú</button>
+                    <button id="resetBtn" class="btn btn-danger btn-small">Borrar todo el progreso</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="data.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
